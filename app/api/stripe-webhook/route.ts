@@ -1,89 +1,124 @@
-import { NextRequest, NextResponse } from 'next/server';
-import Stripe from 'stripe';
-import { createClient } from '@supabase/supabase-js';
-import { xventureCreateSession } from '@/lib/xventure';
+import { NextResponse } from 'next/server'
+import Stripe from 'stripe'
+import { createClient } from '@supabase/supabase-js'
+import { xventureCreateSession } from '@/lib/xventure'
+import {
+    sendCustomerConfirmation,
+    sendAdminNotification,
+    BookingEmailData,
+} from '@/lib/sendEmail'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' });
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' })
+
 const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
-);
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!
+)
 
-export async function POST(request: NextRequest) {
-  const body = await request.text();
-  const signature = request.headers.get('stripe-signature');
-  if (!signature) return NextResponse.json({ error: 'Missing signature' }, { status: 400 });
+export const runtime = 'nodejs'
 
-  let event: Stripe.Event;
-  try {
-    event = stripe.webhooks.constructEvent(body, signature, process.env.STRIPE_WEBHOOK_SECRET!);
-  } catch (err: unknown) {
-    const message = err instanceof Error ? err.message : 'Webhook signature verification failed';
-    console.error('Webhook signature error:', message);
-    return NextResponse.json({ error: message }, { status: 400 });
-  }
+export async function POST(request: Request) {
+    const body = await request.text()
+    const sig = request.headers.get('stripe-signature')!
 
-  try {
+    let event: Stripe.Event
+    try {
+        event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEBHOOK_SECRET!)
+    } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : 'Unknown error'
+        console.error('Webhook signature error:', message)
+        return NextResponse.json({ error: 'Webhook signature error: ' + message }, { status: 400 })
+    }
+
     if (event.type === 'payment_intent.succeeded') {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      const m = pi.metadata;
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        const meta = paymentIntent.metadata
 
-      console.log('Payment succeeded for:', m.sessionTitle, '— creating XVenture session');
+        console.log('Payment succeeded for:', meta.session_title, '-- creating XVenture session')
 
-      // Get theme details from Supabase
-      const { data: theme } = await supabase
-        .from('themes')
-        .select('*')
-        .eq('id', m.themeId)
-        .single();
+        // Idempotency check
+        const { data: existing } = await supabase
+            .from('bookings')
+            .select('id')
+            .eq('stripe_payment_intent_id', paymentIntent.id)
+            .single()
 
-      if (theme) {
+        if (existing) {
+            console.log('Booking already exists for payment intent', paymentIntent.id, '-- skipping')
+            return NextResponse.json({ ok: true, skipped: true })
+        }
+
         // Create XVenture session
-        await xventureCreateSession({
-          sessionTitle: m.sessionTitle,
-          companyName: m.companyName,
-          dynamicUrl: m.dynamicUrl,
-          sessionDate: m.sessionDate,
-          startTime: m.startTime,
-          hostIframeUrl: theme.host_iframe_url,
-          scoringIframeUrl: theme.scoring_iframe_url,
-          virtualWorldIframeUrl: theme.virtual_world_iframe_url,
-        });
-        console.log('XVenture session created successfully');
-      } else {
-        console.error('Theme not found for id:', m.themeId);
-      }
+        let xventureOk = false
+        try {
+            await xventureCreateSession({
+                sessionTitle: meta.session_title,
+                dynamicUrl: meta.dynamic_url,
+                themeSlug: meta.theme_slug,
+                sessionDate: meta.session_date,
+                sessionTime: meta.session_time,
+            })
+            xventureOk = true
+            console.log('XVenture session created successfully!')
+        } catch (err) {
+            console.error('XVenture session creation failed:', err)
+        }
 
-      // Save booking to Supabase
-      const { error: bookingError } = await supabase.from('bookings').insert({
-        session_title: m.sessionTitle,
-        company_name: m.companyName,
-        dynamic_url: m.dynamicUrl,
-        session_date: m.sessionDate,
-        start_time: m.startTime,
-        theme_id: m.themeId,
-        customer_name: m.customerName,
-        customer_email: m.customerEmail,
-        customer_phone: m.customerPhone || '',
-        stripe_payment_intent_id: pi.id,
-        status: 'confirmed',
-      });
+        // Save booking to Supabase
+        const { error: dbError } = await supabase.from('bookings').insert({
+            session_title: meta.session_title,
+            company_name: meta.company_name,
+            dynamic_url: meta.dynamic_url,
+            theme_slug: meta.theme_slug,
+            theme_name: meta.theme_name,
+            customer_name: meta.customer_name,
+            customer_email: meta.customer_email,
+            customer_phone: meta.customer_phone,
+            session_date: meta.session_date,
+            session_time: meta.session_time,
+            stripe_payment_intent_id: paymentIntent.id,
+            amount_paid: paymentIntent.amount,
+            xventure_created: xventureOk,
+            reminder_7day_sent: false,
+            reminder_day_before_sent: false,
+        })
 
-      if (bookingError) {
-        console.error('Supabase booking insert error:', bookingError.message);
-      }
+        if (dbError) {
+            console.error('Supabase insert error:', dbError)
+        } else {
+            console.log('Booking saved to Supabase')
+        }
+
+        // Send emails
+        const emailData: BookingEmailData = {
+            sessionTitle: meta.session_title,
+            companyName: meta.company_name,
+            themeName: meta.theme_name || meta.theme_slug,
+            sessionDate: meta.session_date,
+            sessionTime: meta.session_time,
+            dynamicUrl: meta.dynamic_url,
+            customerName: meta.customer_name,
+            customerEmail: meta.customer_email,
+            customerPhone: meta.customer_phone,
+            stripePaymentIntentId: paymentIntent.id,
+            amountPaid: paymentIntent.amount,
+        }
+
+        try {
+            await Promise.all([
+                sendCustomerConfirmation(emailData),
+                sendAdminNotification(emailData),
+            ])
+            console.log('Confirmation emails sent')
+        } catch (emailErr) {
+            console.error('Email send error:', emailErr)
+        }
     }
 
     if (event.type === 'payment_intent.payment_failed') {
-      const pi = event.data.object as Stripe.PaymentIntent;
-      console.error('Payment failed for intent:', pi.id);
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.error('Payment failed for:', paymentIntent.metadata.session_title)
     }
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Unknown error';
-    console.error('Webhook handler error:', message);
-    // Return 200 so Stripe doesn't retry — log the error for investigation
-    return NextResponse.json({ error: message }, { status: 200 });
-  }
 
-  return NextResponse.json({ received: true });
+    return NextResponse.json({ ok: true })
 }
