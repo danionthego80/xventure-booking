@@ -328,24 +328,22 @@ export default function BookingPage() {
                     <p className="text-gray-400">Loading themes...</p>
                   ) : (
                     themes.map(theme => (
-                      <label
-                        key={theme.id}
-                        className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
-                          formData.themeId === theme.id
-                            ? 'border-[#e94560] bg-[#e94560]/10'
-                            : 'border-white/20 hover:border-white/40'
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name="theme"
-                          value={theme.id}
-                          checked={formData.themeId === theme.id}
-                          onChange={e => setFormData(prev => ({ ...prev, themeId: e.target.value }))}
-                          className="accent-[#e94560]"
-                        />
+<div
+                          key={theme.id}
+                          onClick={() => setFormData(prev => ({ ...prev, themeId: theme.id }))}
+                          className={`flex items-center gap-3 p-4 rounded-xl border cursor-pointer transition-colors ${
+                                                      formData.themeId === theme.id
+                                                        ? 'border-[#e94560] bg-[#e94560]/10'
+                                                        : 'border-white/20 hover:border-white/40'
+                          }`}
+                        >
+                        <div className={`w-4 h-4 rounded-full border-2 flex-shrink-0 ${
+                                                    formData.themeId === theme.id
+                                                      ? 'border-[#e94560] bg-[#e94560]'
+                                                      : 'border-white/40'
+                        }`} />
                         <span className="text-white font-medium">{theme.name}</span>
-                      </label>
+</div>
                     ))
                   )}
                 </div>
