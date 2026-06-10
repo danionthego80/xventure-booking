@@ -429,14 +429,14 @@ export default function Home() {
                                                                                                                                                                                         placeholder="+61 400 000 000"
                                                                                                                                                                                         className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-[#E8521A]/50 focus:ring-1 focus:ring-[#E8521A]/30 transition-colors"
                                                                                                                                                                                       />
-                                                                                                                                              </div>div>
-                                                                                                                            </div>div>
-                                                                                                            </div>div>
+                                                                                                                                              </div>
+                                                                                                                            </div>
+                                                                                                            </div>
                                                                                             
                                                                                               {submitError && (
                                                                                                               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
                                                                                                                 {submitError}
-                                                                                                                </div>div>
+                                                                                                                </div>
                                                                                                           )}
                                                                                             
                                                                                                           <button
@@ -445,11 +445,11 @@ export default function Home() {
                                                                                                                             className="w-full py-4 bg-[#E8521A] hover:bg-[#d4481a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-base"
                                                                                                                           >
                                                                                                                           Continue to Payment →
-                                                                                                            </button>button>
+                                                                                                            </button>
                                                                                               </>>
                                                                                           )}
-                                                                                              </div>div>
-                                                                                    </div>div>
-                                                                              </main>main>
+                                                                                              </div>
+                                                                                    </div>
+                                                                              </main>
                                                                             )
                                                                           }</></button>
