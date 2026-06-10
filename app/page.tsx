@@ -6,7 +6,7 @@ import {
     Elements,
     PaymentElement,
     useStripe,
-    useElements,
+    useElements
 } from '@stripe/react-stripe-js'
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!)
@@ -81,7 +81,7 @@ function CheckoutForm({
                           onClick={onBack}
                           className="mb-6 text-sm text-gray-400 hover:text-white flex items-center gap-1 transition-colors"
                         >
-                        ← Back
+                        <- Back
                 </button>button>
         
               <h2 className="text-xl font-semibold text-white mb-1">Secure Payment</h2>h2>
@@ -444,7 +444,7 @@ export default function Home() {
                                                                                                                             disabled={!isFormValid()}
                                                                                                                             className="w-full py-4 bg-[#E8521A] hover:bg-[#d4481a] disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold rounded-xl transition-colors text-base"
                                                                                                                           >
-                                                                                                                          Continue to Payment →
+                                                                                                                          Continue to Payment ->
                                                                                                             </button>
                                                                                               </>>
                                                                                           )}
