@@ -235,12 +235,18 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
       const row = validRows[i];
       const { data: qData } = await supabase.from('mg_questions').insert({ theme_id: themeId, order_num: startOrder + i, title: row.title, points: row.points || 1, media_url: row.mediaUrl || null, notes: row.notes || null, link: row.link || null }).select().single();
       if (qData) {
-        const answerRows = [
-          { question_id: qData.id, label: LABELS[0], text: row.correctAnswer, is_correct: true as boolean, order_num: 1 },
-          ...row.options.slice(0, 4).map((optText, j) => ({
-            question_id: qData.id, label: LABELS[j + 1], text: optText, is_correct: false as boolean, order_num: j + 2
+                const rawOptions = [
+          { question_id: qData.id, text: row.correctAnswer, is_correct: true as boolean },
+          ...row.options.slice(0, 4).map((optText) => ({
+            question_id: qData.id, text: optText, is_correct: false as boolean
           }))
         ];
+        // Shuffle (Fisher-Yates) so correct answer isn't always position A
+        for (let k = rawOptions.length - 1; k > 0; k--) {
+          const rnd = Math.floor(Math.random() * (k + 1));
+          [rawOptions[k], rawOptions[rnd]] = [rawOptions[rnd], rawOptions[k]];
+        }
+        const answerRows = rawOptions.map((opt, idx) => ({ ...opt, label: LABELS[idx], order_num: idx + 1 }));
         await supabase.from('mg_answer_options').insert(answerRows);
       }
     }
