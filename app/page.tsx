@@ -110,7 +110,7 @@ function CheckoutForm({ bookingData, onBack }: { bookingData: BookingData, onBac
                 </p>
             </div>
 
-            <PaymentElement options={{ wallets: { link: 'never' } }} />
+            <PaymentElement options={{ wallets: { link: 'never' as const } }} />
 
             {errorMessage && (
                 <div className="text-red-600 text-sm">{errorMessage}</div>
