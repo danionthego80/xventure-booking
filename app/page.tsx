@@ -53,7 +53,7 @@ function CheckoutForm({ bookingData, onBack }: { bookingData: BookingData, onBac
 
     return (
         <form onSubmit={handleSubmit} className="space-y-6">
-            <div className="bg-orange-50 border border-orange-200 rounded-lg p-5">
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-5">
                 <h3 className="text-base font-semibold text-gray-900 mb-4">Order Summary</h3>
                 <div className="space-y-2 text-sm text-gray-700">
                     <div className="flex justify-between">
@@ -91,7 +91,7 @@ function CheckoutForm({ bookingData, onBack }: { bookingData: BookingData, onBac
                         </div>
                     )}
                 </div>
-                <div className="border-t border-orange-200 mt-4 pt-4 space-y-1 text-sm">
+                <div className="border-t border-blue-200 mt-4 pt-4 space-y-1 text-sm">
                     <div className="flex justify-between text-gray-600">
                         <span>Subtotal</span>
                         <span>AUD $990.00</span>
@@ -127,7 +127,7 @@ function CheckoutForm({ bookingData, onBack }: { bookingData: BookingData, onBac
                 <button
                     type="submit"
                     disabled={isLoading || !stripe}
-                    style={{ backgroundColor: '#E8521A' }}
+                    style={{ backgroundColor: '#0F3460' }}
                     className="flex-1 py-3 px-4 text-white rounded-lg font-medium hover:opacity-90 disabled:opacity-50"
                 >
                     {isLoading ? 'Processing...' : 'Pay AUD $1,089.00'}
@@ -229,7 +229,7 @@ export default function Home() {
         return (
             <main className="min-h-screen flex items-center justify-center p-4" style={{ backgroundColor: '#f8f4f0' }}>
                 <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md w-full text-center">
-                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#E8521A' }}>
+                    <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4" style={{ backgroundColor: '#0F3460' }}>
                         <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
@@ -257,7 +257,7 @@ export default function Home() {
                             <div
                                 className="w-8 h-8 rounded-full flex items-center justify-center text-sm font-semibold"
                                 style={{
-                                    backgroundColor: step >= s ? '#E8521A' : '#e5e7eb',
+                                    backgroundColor: step >= s ? '#0F3460' : '#e5e7eb',
                                     color: step >= s ? 'white' : '#6b7280',
                                 }}
                             >
@@ -266,7 +266,7 @@ export default function Home() {
                             {s < 3 && (
                                 <div
                                     className="w-12 h-1 mx-1"
-                                    style={{ backgroundColor: step > s ? '#E8521A' : '#e5e7eb' }}
+                                    style={{ backgroundColor: step > s ? '#0F3460' : '#e5e7eb' }}
                                 />
                             )}
                         </div>
@@ -288,8 +288,8 @@ export default function Home() {
                                     onChange={(e) => setBookingData(prev => ({ ...prev, sessionTitle: e.target.value }))}
                                     placeholder="e.g. Acme Corp Team Building"
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
-                                    style={{ '--tw-ring-color': '#E8521A' } as React.CSSProperties}
-                                    onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                    style={{ '--tw-ring-color': '#0F3460' } as React.CSSProperties}
+                                    onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                 />
                             </div>
@@ -304,7 +304,7 @@ export default function Home() {
                                     onChange={(e) => setBookingData(prev => ({ ...prev, companyName: e.target.value }))}
                                     placeholder="e.g. Acme Corp"
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
-                                    onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                    onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                 />
                             </div>
@@ -331,7 +331,7 @@ export default function Home() {
                                         value={bookingData.sessionDate}
                                         onChange={(e) => setBookingData(prev => ({ ...prev, sessionDate: e.target.value }))}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
-                                        onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                        onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                         onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                     />
                                 </div>
@@ -344,7 +344,7 @@ export default function Home() {
                                         value={bookingData.sessionTime}
                                         onChange={(e) => setBookingData(prev => ({ ...prev, sessionTime: e.target.value }))}
                                         className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
-                                        onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                        onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                         onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                     />
                                 </div>
@@ -367,9 +367,9 @@ export default function Home() {
                                             }))}
                                             className="p-3 rounded-lg border text-sm font-medium text-left transition-all"
                                             style={{
-                                                borderColor: bookingData.themeId === theme.id ? '#E8521A' : '#e5e7eb',
+                                                borderColor: bookingData.themeId === theme.id ? '#0F3460' : '#e5e7eb',
                                                 backgroundColor: bookingData.themeId === theme.id ? '#fff5f0' : 'white',
-                                                color: bookingData.themeId === theme.id ? '#E8521A' : '#374151',
+                                                color: bookingData.themeId === theme.id ? '#0F3460' : '#374151',
                                             }}
                                         >
                                             {theme.name}
@@ -381,7 +381,7 @@ export default function Home() {
                             <button
                                 type="button"
                                 onClick={handleStep1Next}
-                                style={{ backgroundColor: '#E8521A' }}
+                                style={{ backgroundColor: '#0F3460' }}
                                 className="w-full py-3 text-white rounded-lg font-semibold hover:opacity-90"
                             >
                                 Continue -&gt;
@@ -403,7 +403,7 @@ export default function Home() {
                                     onChange={(e) => setBookingData(prev => ({ ...prev, customerName: e.target.value }))}
                                     placeholder="Your full name"
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
-                                    onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                    onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                 />
                             </div>
@@ -418,7 +418,7 @@ export default function Home() {
                                     onChange={(e) => setBookingData(prev => ({ ...prev, customerEmail: e.target.value }))}
                                     placeholder="you@example.com"
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
-                                    onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                    onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                 />
                             </div>
@@ -433,7 +433,7 @@ export default function Home() {
                                     onChange={(e) => setBookingData(prev => ({ ...prev, customerPhone: e.target.value }))}
                                     placeholder="+61 4XX XXX XXX"
                                     className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none"
-                                    onFocus={(e) => e.target.style.borderColor = '#E8521A'}
+                                    onFocus={(e) => e.target.style.borderColor = '#0F3460'}
                                     onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
                                 />
                             </div>
@@ -450,7 +450,7 @@ export default function Home() {
                                     type="button"
                                     onClick={handleStep2Next}
                                     disabled={isCreatingIntent}
-                                    style={{ backgroundColor: '#E8521A' }}
+                                    style={{ backgroundColor: '#0F3460' }}
                                     className="flex-1 py-3 px-4 text-white rounded-lg font-semibold hover:opacity-90 disabled:opacity-50"
                                 >
                                     {isCreatingIntent ? 'Loading...' : 'Continue ->'}
