@@ -546,7 +546,7 @@ export default function ScorePage({ params }: { params: { gameId: string } }) {
               {activeQuestion.mg_answer_options
                 .sort((a, b) => a.order_num - b.order_num)
                 .map(option => {
-                  let btnClass = 'w-full text-left rounded-xl p-4 border-2 transition-all ';
+                  let btnClass = 'w-full text-left rounded-xl p-4 border-2 transition-all text-gray-900 ';
                   if (alreadySubmitted) {
                     if (option.is_correct) btnClass += 'border-green-500 bg-green-50 text-green-800';
                     else if (mySubmission?.answer_option_id === option.id) btnClass += 'border-red-400 bg-red-50 text-red-800';
