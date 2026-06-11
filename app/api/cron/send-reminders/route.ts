@@ -3,8 +3,8 @@ import { createClient } from '@supabase/supabase-js'
 import {
     sendSevenDayReminder,
     sendDayBeforeReminder,
-    BookingEmailData,
 } from '@/lib/sendEmail'
+import type { BookingEmailData } from '@/lib/sendEmail'
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -68,8 +68,8 @@ export async function GET(request: Request) {
                     .eq('id', booking.id)
                 results.push(`7-day reminder sent to ${booking.customer_email}`)
             } catch (e) {
-                console.error('Failed to send 7-day reminder for booking', booking.id, e)
-                results.push(`FAILED 7-day reminder for ${booking.customer_email}`)
+                console.error('Failed 7-day reminder for booking', booking.id, e)
+                results.push(`FAILED 7-day for ${booking.customer_email}`)
             }
         }
     }
@@ -105,8 +105,8 @@ export async function GET(request: Request) {
                     .eq('id', booking.id)
                 results.push(`Day-before reminder sent to ${booking.customer_email}`)
             } catch (e) {
-                console.error('Failed to send day-before reminder for booking', booking.id, e)
-                results.push(`FAILED day-before reminder for ${booking.customer_email}`)
+                console.error('Failed day-before reminder for booking', booking.id, e)
+                results.push(`FAILED day-before for ${booking.customer_email}`)
             }
         }
     }
