@@ -8,7 +8,7 @@ import {
     BookingEmailData,
 } from '@/lib/sendEmail'
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: '2023-10-16' })
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
 const supabase = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -53,10 +53,13 @@ export async function POST(request: Request) {
         try {
             await xventureCreateSession({
                 sessionTitle: meta.session_title,
+                companyName: meta.company_name || '',
                 dynamicUrl: meta.dynamic_url,
-                themeSlug: meta.theme_slug,
                 sessionDate: meta.session_date,
-                sessionTime: meta.session_time,
+                startTime: meta.session_time,
+                hostIframeUrl: 'https://vrlearningagency.com/VirtualWorlds/Dani_Video_040821/index.htm',
+                scoringIframeUrl: 'https://vrlearningagency.com/VirtualWorlds/Dani_Video_040821/index.htm',
+                virtualWorldIframeUrl: 'https://vrlearningagency.com/VirtualWorlds/Dani_Video_040821/index.htm',
             })
             xventureOk = true
             console.log('XVenture session created successfully!')
