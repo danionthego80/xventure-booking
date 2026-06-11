@@ -79,10 +79,27 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
   const [csvParsed, setCsvParsed] = useState(false);
   const [bulkMode, setBulkMode] = useState<'append' | 'replace'>('append');
   const [bulkImporting, setBulkImporting] = useState(false);
-  const [bulkDone, setBulkDone] = useState(false);
+  const [bulkDone, setBulkDone] = useState(false)
+  const [editingName, setEditingName] = useState(false);
+  const [nameValue, setNameValue] = useState('');
+  const [nameSaving, setNameSaving] = useState(false);;
   const fileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => { loadTheme(); loadQuestions(); }, [themeId]);
+
+    async function handleRenameTheme() {
+    if (!nameValue.trim() || nameSaving) return;
+    setNameSaving(true);
+    const { error } = await supabase
+      .from('mg_themes')
+      .update({ name: nameValue.trim() })
+      .eq('id', themeId);
+    if (!error) {
+      setTheme((prev: any) => ({ ...prev, name: nameValue.trim() }));
+    }
+    setEditingName(false);
+    setNameSaving(false);
+  }
 
   async function loadTheme() {
     const { data } = await supabase.from('mg_themes').select('*').eq('id', themeId).single();
@@ -262,7 +279,28 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
         <div className="max-w-5xl mx-auto px-6 py-4 flex items-center gap-4">
           <a href="/admin" className="text-blue-200 hover:text-white text-sm">← Admin</a>
           <span className="text-blue-300">/</span>
-          <h1 className="text-lg font-bold">{theme.name}</h1>
+          {editingName ? (
+            <form onSubmit={e => { e.preventDefault(); handleRenameTheme(); }} className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={nameValue}
+                onChange={e => setNameValue(e.target.value)}
+                onBlur={handleRenameTheme}
+                className="text-lg font-bold bg-white/10 border border-white/30 rounded px-2 py-0.5 text-white focus:outline-none focus:ring-2 focus:ring-white/50 min-w-[200px]"
+                disabled={nameSaving}
+              />
+              {nameSaving && <span className="text-sm text-blue-200">Saving…</span>}
+            </form>
+          ) : (
+            <h1
+              className="text-lg font-bold cursor-pointer hover:text-blue-200 transition-colors group flex items-center gap-2"
+              onClick={() => { setNameValue(theme?.name || ''); setEditingName(true); }}
+              title="Click to rename"
+            >
+              {theme?.name}
+              <span className="text-xs text-blue-300 opacity-0 group-hover:opacity-100 transition-opacity">✎</span>
+            </h1>
+          )}
           {theme.description && <span className="text-blue-300 text-sm">— {theme.description}</span>}
         </div>
       </div>
