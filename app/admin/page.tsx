@@ -71,7 +71,7 @@ export default function AdminPage() {
                 type="password"
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-900 focus:outline-none focus:ring-2"
                 style={{ focusRingColor: '#0F3460' } as any}
                 placeholder="Enter admin password"
                 autoFocus
