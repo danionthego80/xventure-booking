@@ -235,10 +235,16 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
       const row = validRows[i];
       const { data: qData } = await supabase.from('mg_questions').insert({ theme_id: themeId, order_num: startOrder + i, title: row.title, points: row.points || 1, media_url: row.mediaUrl || null, notes: row.notes || null, link: row.link || null }).select().single();
       if (qData) {
-        await supabase.from('mg_answer_options').insert([
-          { question_id: qData.id, label: LABELS[0], text: row.correctAnswer, is_correct: true, order_num: 1 },
-          ...row.options.slice(0, 4).map((text, j) => ({ question_id: qData.id, label: LABELS[j + 1], text, is_correct: false, order_num: j + 2 }))
-        ]);
+        const answerRows = [
+          { question_id: qData.id, label: LABELS[0], text: row.correctAnswer, is_correct: true as boolean, order_num: 1 },
+          ...row.options.slice(0, 4).map((optText, j) => ({
+            question_id: qData.id, label: LABELS[j + 1], text: optText, is_correct: false as boolean, order_num: j + 2
+          }))
+        ];
+        await supabase.from('mg_answer_options').insert(answerRows);
+      }
+    }
+    setBulkImporting(false); setBulkDone(true); setCsvRows([]); setCsvErrors([]); setCsvParsed(false);
     if (fileRef.current) fileRef.current.value = '';
     loadQuestions();
   }
