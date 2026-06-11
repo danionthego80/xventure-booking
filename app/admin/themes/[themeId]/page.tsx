@@ -174,12 +174,8 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
       const c = text[i];
       if (c === '"') { if (inQuotes && text[i+1] === '"') { cell += '"'; i++; } else inQuotes = !inQuotes; }
       else if (c === ',' && !inQuotes) { row.push(cell); cell = ''; }
-      else if ((c === '
-' || c === '
-') && !inQuotes) {
-        if (c === '
-' && text[i+1] === '
-') i++;
+      else if ((c === '\n' || c === '\n') && !inQuotes) {
+        if (c === '\n' && text[i+1] === '\n') i++;
         row.push(cell); cell = '';
         if (row.some(r => r.trim())) rows.push(row);
         row = [];
