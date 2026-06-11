@@ -212,9 +212,8 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
       for (let j = correctIdx + 1; j < row.length; j++) { const opt = row[j]?.trim(); if (opt) options.push(opt); }
       const rowErrors: string[] = [];
       if (!correctAnswer) rowErrors.push('Missing correct answer');
-      if (options.length < 2) rowErrors.push('Less than 2 answer options');
-      if (options.length > 5) rowErrors.push('Too many options (max 5)');
-      if (correctAnswer && options.length > 0 && !options.some(o => o === correctAnswer || o.toLowerCase() === correctAnswer.toLowerCase())) rowErrors.push('Correct answer not found in options');
+      if (options.length < 1) rowErrors.push('Missing wrong answer options');
+      if (options.length > 4) rowErrors.push('Too many wrong answer options (max 4)');
       const cr: CsvRow = { rowNum: i+1, title, points: pointsIdx >= 0 && row[pointsIdx]?.trim() ? Number(row[pointsIdx].trim()) || 1 : 1, mediaUrl: imgIdx >= 0 ? row[imgIdx]?.trim() || '' : '', notes: noteIdx >= 0 ? row[noteIdx]?.trim() || '' : '', link: linkIdx >= 0 ? row[linkIdx]?.trim() || '' : '', correctAnswer, options, error: rowErrors.length > 0 ? rowErrors.join('; ') : undefined };
       parsed.push(cr);
       if (rowErrors.length > 0) errors.push(`Row ${i+1} ("${title.slice(0,30)}"): ${rowErrors.join('; ')}`);
@@ -236,10 +235,10 @@ export default function ThemeDetailPage({ params }: { params: { themeId: string 
       const row = validRows[i];
       const { data: qData } = await supabase.from('mg_questions').insert({ theme_id: themeId, order_num: startOrder + i, title: row.title, points: row.points || 1, media_url: row.mediaUrl || null, notes: row.notes || null, link: row.link || null }).select().single();
       if (qData) {
-        await supabase.from('mg_answer_options').insert(row.options.slice(0,5).map((text, j) => ({ question_id: qData.id, label: LABELS[j], text, is_correct: text === row.correctAnswer || text.toLowerCase() === row.correctAnswer.toLowerCase(), order_num: j+1 })));
-      }
-    }
-    setBulkImporting(false); setBulkDone(true); setCsvRows([]); setCsvErrors([]); setCsvParsed(false);
+        await supabase.from('mg_answer_options').insert([
+          { question_id: qData.id, label: LABELS[0], text: row.correctAnswer, is_correct: true, order_num: 1 },
+          ...row.options.slice(0, 4).map((text, j) => ({ question_id: qData.id, label: LABELS[j + 1], text, is_correct: false, order_num: j + 2 }))
+        ]);
     if (fileRef.current) fileRef.current.value = '';
     loadQuestions();
   }
