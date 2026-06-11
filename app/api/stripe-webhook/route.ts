@@ -5,8 +5,8 @@ import { xventureCreateSession } from '@/lib/xventure'
 import {
     sendCustomerConfirmation,
     sendAdminNotification,
-    BookingEmailData,
 } from '@/lib/sendEmail'
+import type { BookingEmailData } from '@/lib/sendEmail'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!)
 
