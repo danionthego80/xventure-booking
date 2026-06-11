@@ -59,7 +59,7 @@ interface ScoreRow {
   total_points: number;
   questions_correct: number;
   questions_answered: number;
-  mg_teams: { name: string } | null;
+  mg_teams: { name: string } | { name: string }[] | null;
 }
 
 export default function ScorePage({ params }: { params: { gameId: string } }) {
@@ -322,7 +322,7 @@ export default function ScorePage({ params }: { params: { gameId: string } }) {
       .order('total_points', { ascending: false })
       .order('questions_correct', { ascending: false })
       .limit(10);
-    if (data) setLeaderboard(data as ScoreRow[]);
+    if (data) setLeaderboard(data.map((row: any) => ({ ...row, mg_teams: Array.isArray(row.mg_teams) ? row.mg_teams[0] ?? null : row.mg_teams })));
   }
 
   async function showFinalLeaderboard() {
