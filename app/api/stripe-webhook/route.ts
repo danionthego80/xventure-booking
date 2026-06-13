@@ -71,6 +71,49 @@ export async function POST(request: Request) {
                   console.warn('No theme_slug in metadata — using default host iframe only')
         }
 
+        // Auto-create Mind Games scoring game and build unique scoring link
+                const THEME_SLUG_TO_MG_NAME: Record<string, string> = {
+                                '2020-games': 'The 2020 Games',
+                }
+                const mgThemeName = THEME_SLUG_TO_MG_NAME[meta.theme_slug]
+                let scoringGameId: string | null = null
+                if (mgThemeName) {
+                                try {
+                                                  const { data: mgTheme } = await supabase
+                                                    .from('mg_themes')
+                                                    .select('id')
+                                                    .eq('name', mgThemeName)
+                                                    .single()
+                                                  if (mgTheme) {
+                                                                      const sessionDateTime = meta.session_date && meta.session_time
+                                                                        ? new Date(`${meta.session_date}T${meta.session_time}:00+10:00`).toISOString()
+                                                                                            : null
+                                                                      const endDateTime = sessionDateTime
+                                                                        ? new Date(new Date(sessionDateTime).getTime() + 60 * 60 * 1000).toISOString()
+                                                                                            : null
+                                                                      const { data: newGame } = await supabase
+                                                                        .from('mg_games')
+                                                                        .insert({
+                                                                                                title: `${meta.session_title} — ${meta.company_name || 'Session'}`,
+                                                                                                theme_id: mgTheme.id,
+                                                                                                scheduled_start: sessionDateTime,
+                                                                                                scheduled_end: endDateTime,
+                                                                                                points_per_question: 10,
+                                                                                                penalty_mode: 'none',
+                                                                                                status: 'draft',
+                                                                        })
+                                                                        .select('id')
+                                                                        .single()
+                                                                      if (newGame) {
+                                                                                            scoringGameId = newGame.id
+                                                                                            scoringIframeUrl = `https://xventure-scoring.vercel.app/score/${scoringGameId}`
+                                                                                            console.log('Mind Games scoring game auto-created, unique URL:', scoringIframeUrl)
+                                                                      }
+                                                  }
+                                } catch (mgErr) {
+                                                  console.error('Failed to auto-create Mind Games game:', mgErr)
+                                }
+                }
         // Create XVenture session
         let xventureOk = false
           try {
@@ -114,42 +157,6 @@ export async function POST(request: Request) {
         } else {
                   console.log('Booking saved to Supabase')
         }
-
-        // Auto-create Mind Games scoring game for supported themes
-        const THEME_SLUG_TO_MG_NAME: Record<string, string> = {
-                  '2020-games': 'The 2020 Games',
-        }
-          const mgThemeName = THEME_SLUG_TO_MG_NAME[meta.theme_slug]
-          if (mgThemeName && !dbError) {
-                    try {
-                                const { data: mgTheme } = await supabase
-                                  .from('mg_themes')
-                                  .select('id')
-                                  .eq('name', mgThemeName)
-                                  .single()
-                                if (mgTheme) {
-                                              const sessionDateTime = meta.session_date && meta.session_time
-                                                ? new Date(`${meta.session_date}T${meta.session_time}:00+10:00`).toISOString()
-                                                              : null
-                                              const endDateTime = sessionDateTime
-                                                ? new Date(new Date(sessionDateTime).getTime() + 3 * 60 * 60 * 1000).toISOString()
-                                                              : null
-                                              await supabase.from('mg_games').insert({
-                                                              title: `${meta.session_title} — ${meta.company_name || 'Session'}`,
-                                                              theme_id: mgTheme.id,
-                                                              scheduled_start: sessionDateTime,
-                                                              scheduled_end: endDateTime,
-                                                              points_per_question: 10,
-                                                              penalty_mode: 'none',
-                                                              status: 'draft',
-                                              })
-                                              console.log('Mind Games scoring game auto-created for theme:', mgThemeName)
-                                }
-                    } catch (mgErr) {
-                                console.error('Failed to auto-create Mind Games game:', mgErr)
-                    }
-          }
-
         // Send emails
         const emailData: BookingEmailData = {
                   sessionTitle: meta.session_title,
