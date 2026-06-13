@@ -17,8 +17,8 @@ export function buildSessionTimes(sessionDateStr: string, startTimeStr: string) 
     const [hours, minutes] = startTimeStr.split(':').map(Number);
     const hostStart = new Date(year, month - 1, day, hours, minutes, 0);
     const hostEnd = new Date(hostStart.getTime() + 10 * 60 * 1000);
-    const scoringStart = new Date(hostStart.getTime() + 15 * 60 * 1000);
-    const scoringEnd = new Date(hostStart.getTime() + 20 * 60 * 1000);
+    const scoringStart = new Date(hostStart.getTime());
+    const scoringEnd = new Date(hostStart.getTime() + 60 * 60 * 1000);
     const vwStart = new Date(hostStart.getTime());
     const vwEnd = new Date(hostStart.getTime() + 60 * 60 * 1000);
     return {
